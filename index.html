@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>my-threejs-app</title>
+</head>
+
+<body>
+  <div id="analytics-ui">
+    <div class="panel">
+      <h3 style="margin-top: 0; color: #ddd; font-size: 14px;">تحليل الطاقة في الوقت الحقيقي</h3>
+      <canvas id="energyChart" width="300" height="150"></canvas>
+    </div>
+
+    <div class="panel">
+      <h3 style="margin-top: 0; color: #ddd; font-size: 14px;">سجل التصادمات (Live Log)</h3>
+      <div id="collision-log">
+      </div>
+    </div>
+  </div>
+  <canvas class="threejs"></canvas>
+  <div id="app"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
