@@ -184,26 +184,37 @@ export class NewtonsCradlePhysics {
                     const vA_new = ((1 - e) / 2) * vA + ((1 + e) / 2) * vB;
                     const vB_new = ((1 + e) / 2) * vA + ((1 - e) / 2) * vB;
 
-                    const impulse = this.m * Math.abs(vB_new - vB);
+
+                    let impulse = this.m * Math.abs(vB_new - vB);
+                    const MAX_IMPULSE = 50;
+                    impulse = Math.min(impulse, MAX_IMPULSE);
+
 
                     this.justCollided = true;
                     this.maxImpulse = Math.max(this.maxImpulse, impulse);
 
                     const subDtSafe = dt > 1e-9 ? dt : 1e-3;
                     const collisionForce = impulse / subDtSafe;
+
+
                     const KE_before = 0.5 * this.m * (vA * vA + vB * vB);
                     const KE_after = 0.5 * this.m * (vA_new * vA_new + vB_new * vB_new);
                     const energyLost = KE_before - KE_after;
 
+
                     A.omega = vA_new / L;
                     B.omega = vB_new / L;
+
+
                     if (penetration > 1e-6) {
-                        const corr = penetration / 2;
-                        A.theta -= corr / L;
-                        B.theta += corr / L;
+
+                        const safeCorr = (penetration / 2) + 1e-5;
+                        A.theta -= safeCorr / L;
+                        B.theta += safeCorr / L;
                     }
 
-                    if (energyLost > 1e-7) {
+
+                    if (impulse > 0.01) {
                         this.collisionLog.push({
                             time: this.time,
                             ballA: i,
