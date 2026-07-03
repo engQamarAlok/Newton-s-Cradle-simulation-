@@ -1,17 +1,17 @@
 import * as THREE from 'three';
 import { GUI } from 'lil-gui';
-import { NewtonsCradlePhysics } from './PhysicsEngine.js';
+import { NewtonsCradlePhysics } from './physics.js';
 import { Chart, registerables } from 'chart.js';
 Chart.register(...registerables);
 
 export class AnimationSystem {
-    constructor(scene, camera, renderer, controls, ballMeshes) {
+    constructor(scene, camera, renderer, controls, pivotGroups, config) {
         this.scene = scene;
         this.camera = camera;
         this.renderer = renderer;
         this.controls = controls;
-        this.ballMeshes = ballMeshes;
-        this.physics = new NewtonsCradlePhysics({ numBalls: 5 });
+        this.pivotGroups = pivotGroups;
+        this.physics = new NewtonsCradlePhysics(config);
         this.audioCtx = null;
         this.setupGUI();
         this.clock = new THREE.Clock();
@@ -90,26 +90,21 @@ export class AnimationSystem {
             if (tableBody) {
                 tableBody.innerHTML = '';
 
-                this.physics.balls.forEach((ball, i) => {
+                const physicsData = this.physics.getBalls();
 
-                    const tension = this.physics.getTension(i);
-                    const drag = this.physics.getDragForce(i);
-                    const maxHeight = this.physics.getMaxHeight(ball.theta);
-                    const impactVelocity = this.physics.getImpactVelocity(ball.theta);
-
-
-                    const displayTheta = Math.abs(ball.theta) < 0.0005 ? "0.000" : ball.theta.toFixed(3);
+                physicsData.forEach((ballData, i) => {
+                    const displayTheta = Math.abs(ballData.theta) < 0.0005 ? "0.000" : ballData.theta.toFixed(3);
                     const row = document.createElement('tr');
                     row.style.borderBottom = '1px solid #444';
 
                     row.innerHTML = `
-                        <td style="padding: 6px; font-weight: bold; color: #2ed573;">${i + 1}</td>
-                        <td style="padding: 6px;">${displayTheta}</td>
-                        <td style="padding: 6px; color: #ffa502;">${tension.toFixed(2)} N</td>
-                        <td style="padding: 6px; color: #ff4757;">${drag.toFixed(4)} N</td>
-                        <td style="padding: 6px; color: #1e90ff;">${(maxHeight * 100).toFixed(2)} سم</td>
-                        <td style="padding: 6px; color: #2ed573; font-weight: bold;">${impactVelocity.toFixed(2)} م/ث</td>
-                    `;
+            <td style="padding: 6px; font-weight: bold; color: #2ed573;">${i + 1}</td>
+            <td style="padding: 6px;">${displayTheta}</td>
+            <td style="padding: 6px; color: #ffa502;">${ballData.tension.toFixed(2)} N</td>
+            <td style="padding: 6px; color: #ff4757;">${ballData.dragForce.toFixed(4)} N</td>
+            <td style="padding: 6px; color: #1e90ff;">${(ballData.height * 100).toFixed(2)} سم</td>
+            <td style="padding: 6px; color: #2ed573; font-weight: bold;">${ballData.impactVelocity.toFixed(2)} م/ث</td>
+        `;
 
                     tableBody.appendChild(row);
                 });
@@ -178,6 +173,8 @@ export class AnimationSystem {
 
         folderPhysics.add(this.physics, 'e', 0, 1).name('معامل الارتداد');
         folderPhysics.add(this.physics, 'b', 0, 0.05).name('مقاومة الهواء');
+        folderPhysics.add(this.physics, 'initialAngle', 0, Math.PI / 2, 0.05)
+            .name('زاوية الإطلاق (راديان)');
 
         const folderActions = gui.addFolder('أنماط الإطلاق');
         const actions = {
@@ -201,13 +198,13 @@ export class AnimationSystem {
 
     triggerPattern(count) {
         this.physics.reset();
-        this.physics.lift(count, Math.PI / 4);
+        this.physics.lift(count, this.physics.initialAngle);
     }
 
     triggerDualPattern(count) {
         this.physics.reset();
-        this.physics.lift(count, Math.PI / 4);
-        this.physics.liftRight(count, Math.PI / 4);
+        this.physics.lift(count, this.physics.initialAngle);
+        this.physics.liftRight(count, this.physics.initialAngle);
     }
 
     animate() {
@@ -226,8 +223,8 @@ export class AnimationSystem {
 
         const physicsBalls = this.physics.getBalls();
         physicsBalls.forEach((b, i) => {
-            if (this.ballMeshes[i]) {
-                this.ballMeshes[i].rotation.z = b.theta;
+            if (this.pivotGroups[i]) {
+                this.pivotGroups[i].rotation.z = b.theta;
             }
         });
         this.updateUI();

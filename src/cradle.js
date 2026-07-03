@@ -1,18 +1,18 @@
 import * as THREE from 'three';
 
 export class Cradle {
-    constructor(scene, tableSurfaceY, ballsCount = 5, ballRadius = 0.4, stringLength = 3) {
+    constructor(scene, tableSurfaceY, ballsCount, ballRadius, stringLength ) {
         this.scene = scene;
-        this.tableSurfaceY = tableSurfaceY; 
+        this.tableSurfaceY = tableSurfaceY;
         this.ballsCount = ballsCount;
         this.ballRadius = ballRadius;
-        this.stringLength = stringLength;
+        this.stringLength = stringLength*10;
         this.cradles = [];
 
         this.ironMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.9, roughness: 0.1 });
         this.stringMaterial = new THREE.LineBasicMaterial({ color: 0xffffff });
 
-        this.buildCradle(); 
+        this.buildCradle();
     }
 
     buildCradle() {
