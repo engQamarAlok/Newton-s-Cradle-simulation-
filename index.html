@@ -10,14 +10,42 @@
 
 <body>
   <div id="analytics-ui">
-    <div class="panel">
-      <h3 style="margin-top: 0; color: #ddd; font-size: 14px;">تحليل الطاقة في الوقت الحقيقي</h3>
-      <canvas id="energyChart" width="300" height="150"></canvas>
-    </div>
+    <div id="left-panel-container">
+      <div class="panel">
+        <h3 style="margin-top: 0; color: #ddd; font-size: 14px;">تحليل الطاقة في الوقت الحقيقي</h3>
+        <canvas id="energyChart" width="300" height="150"></canvas>
+      </div>
 
-    <div class="panel">
-      <h3 style="margin-top: 0; color: #ddd; font-size: 14px;">سجل التصادمات (Live Log)</h3>
-      <div id="collision-log">
+      <div class="panel">
+        <h3 style="margin-top: 0; color: #ddd; font-size: 14px;">سجل التصادمات (Live Log)</h3>
+        <div id="collision-log">
+        </div>
+      </div>
+      <div id="period-panel"
+        style="color: white; background: rgba(30,30,30,0.8); padding: 15px; border-radius: 8px; font-family: sans-serif;">
+        <h3 style="margin-top: 0; color: #2ed573;">⏱️ الزمن الدوري (Simulation Period)</h3>
+        <p>الزمن الدوري النظري: <span id="theoretical-period" style="font-weight: bold; color: #1e90ff;">0</span> ثانية
+        </p>
+        <p>الزمن الدوري المقاس: <span id="measured-period" style="font-weight: bold; color: #ff4757;">0</span> ثانية</p>
+      </div>
+
+      <div id="physics-panel"
+        style="color: white; background: rgba(30,30,30,0.8); padding: 15px; border-radius: 8px; font-family: sans-serif;">
+        <h3 style="margin-top: 0; color: #1e90ff;">📊 البيانات الفيزيائية اللحظية للكرات</h3>
+        <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">
+          <thead>
+            <tr style="border-bottom: 2px solid #555; color: #ccc;">
+              <th style="padding: 8px;">الكرة</th>
+              <th style="padding: 8px;">الزاوية (Rad)</th>
+              <th style="padding: 8px;">قوة الشد (Tension)</th>
+              <th style="padding: 8px;">مقاومة الهواء (Drag)</th>
+              <th style="padding: 8px;">أقصى ارتفاع (Max H)</th>
+              <th style="padding: 8px;">سرعة الاصطدام المتوقعة</th>
+            </tr>
+          </thead>
+          <tbody id="balls-physics-table">
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

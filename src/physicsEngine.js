@@ -1,9 +1,6 @@
-
 export class NewtonsCradlePhysics {
 
     constructor(config = {}) {
-
-
         this.G = 9.81;
         this.numBalls = config.numBalls ?? 5;
         this.L = config.stringLength ?? 0.3;
@@ -16,7 +13,7 @@ export class NewtonsCradlePhysics {
         this.spacing = 2 * this.R;
 
         this.collisionLog = [];
-        this.energyHistory = [];
+
         this.time = 0;
 
         this._periodTracker = {
@@ -28,9 +25,7 @@ export class NewtonsCradlePhysics {
         this._initBalls();
     }
 
-
     _initBalls() {
-
         this.balls = Array.from({ length: this.numBalls }, (_, i) => ({
             theta: 0,
             omega: 0,
@@ -43,7 +38,6 @@ export class NewtonsCradlePhysics {
         this._periodTracker = { lastCrossTime: null, lastDir: null, measured: null };
     }
 
-
     reset() { this._initBalls(); }
 
     lift(count, angleRad) {
@@ -54,8 +48,6 @@ export class NewtonsCradlePhysics {
             this.balls[i].omega = 0;
         }
     }
-
-
 
     liftRight(count, angleRad) {
         count = Math.max(1, Math.min(count, this.numBalls - 1));
@@ -68,7 +60,6 @@ export class NewtonsCradlePhysics {
         }
     }
 
-    release() { }
 
     step(dt) {
         dt = Math.min(dt, 0.05);
@@ -85,7 +76,6 @@ export class NewtonsCradlePhysics {
         this._trackPeriod();
         this._recordEnergy();
     }
-
     getBalls() {
         return this.balls.map((b, i) => {
             const sinT = Math.sin(b.theta);
@@ -112,7 +102,6 @@ export class NewtonsCradlePhysics {
         });
     }
 
-
     getEnergy() {
         let KE = 0, PE = 0;
         this.balls.forEach(b => {
@@ -127,7 +116,6 @@ export class NewtonsCradlePhysics {
         return { KE, PE, TE, dissipated: Math.max(0, initialTE - TE) };
     }
 
-
     getPeriod() {
         return {
             theoretical: 2 * Math.PI * Math.sqrt(this.L / this.G),
@@ -135,19 +123,10 @@ export class NewtonsCradlePhysics {
         };
     }
 
-
     getCollisionLog() { return [...this.collisionLog]; }
 
 
-    getEnergyHistory() { return [...this.energyHistory]; }
-
-    setRestitution(e) { this.e = Math.max(0, Math.min(1, e)); }
-
-    setAirDamping(b) { this.b = Math.max(0, b); }
-
-
     _integrate(dt) {
-
         const g_over_L = this.G / this.L;
         const b_over_m = this.b / this.m;
 
@@ -160,9 +139,7 @@ export class NewtonsCradlePhysics {
         });
     }
 
-
     _resolveCollisions(dt) {
-
         const L = this.L;
         const e = this.e;
 
@@ -184,11 +161,9 @@ export class NewtonsCradlePhysics {
                     const vA_new = ((1 - e) / 2) * vA + ((1 + e) / 2) * vB;
                     const vB_new = ((1 + e) / 2) * vA + ((1 - e) / 2) * vB;
 
-
                     let impulse = this.m * Math.abs(vB_new - vB);
                     const MAX_IMPULSE = 50;
                     impulse = Math.min(impulse, MAX_IMPULSE);
-
 
                     this.justCollided = true;
                     this.maxImpulse = Math.max(this.maxImpulse, impulse);
@@ -196,38 +171,26 @@ export class NewtonsCradlePhysics {
                     const subDtSafe = dt > 1e-9 ? dt : 1e-3;
                     const collisionForce = impulse / subDtSafe;
 
-
                     const KE_before = 0.5 * this.m * (vA * vA + vB * vB);
                     const KE_after = 0.5 * this.m * (vA_new * vA_new + vB_new * vB_new);
                     const energyLost = KE_before - KE_after;
 
-
                     A.omega = vA_new / L;
                     B.omega = vB_new / L;
 
-
                     if (penetration > 1e-6) {
-
                         const safeCorr = (penetration / 2) + 1e-5;
                         A.theta -= safeCorr / L;
                         B.theta += safeCorr / L;
                     }
 
-
                     if (impulse > 0.01) {
                         this.collisionLog.push({
-                            time: this.time,
-                            ballA: i,
-                            ballB: i + 1,
-                            vA_before: vA,
-                            vB_before: vB,
-                            vA_after: vA_new,
-                            vB_after: vB_new,
-                            impulse,
-                            collisionForce,
-                            energyLost,
+                            time: this.time, ballA: i, ballB: i + 1,
+                            vA_before: vA, vB_before: vB,
+                            vA_after: vA_new, vB_after: vB_new,
+                            impulse, collisionForce, energyLost,
                         });
-
                         if (this.collisionLog.length > 200) this.collisionLog.shift();
                     }
                 }
@@ -236,7 +199,6 @@ export class NewtonsCradlePhysics {
     }
 
     _trackPeriod() {
-
         const ball = this.balls[0];
         const dir = ball.omega < 0 ? -1 : 1;
         const pt = this._periodTracker;
@@ -250,9 +212,7 @@ export class NewtonsCradlePhysics {
         pt.lastDir = dir;
     }
 
-
     _recordEnergy() {
-
         const last = this.energyHistory[this.energyHistory.length - 1];
         if (last && this.time - last.time < 0.05) return;
 
@@ -262,44 +222,10 @@ export class NewtonsCradlePhysics {
         if (this.energyHistory.length > 500) this.energyHistory.shift();
     }
 
+    getImpactVelocity(thetaRad) { return Math.sqrt(2 * this.G * this.L * (1 - Math.cos(thetaRad))); }
+    getTension(ballIndex) { return this.m * this.G * Math.cos(this.balls[ballIndex].theta) + this.m * Math.pow(this.L * this.balls[ballIndex].omega, 2) / this.L; }
+    getDragForce(ballIndex) { return this.b * Math.abs(this.L * this.balls[ballIndex].omega); }
+    getMaxHeight(thetaRad) { return this.L * (1 - Math.cos(thetaRad)); }
 
-
-    getImpactVelocity(thetaRad) {
-        return Math.sqrt(2 * this.G * this.L * (1 - Math.cos(thetaRad)));
-    }
-
-
-    getTension(ballIndex) {
-        const b = this.balls[ballIndex];
-        const v = this.L * b.omega;
-        return this.m * this.G * Math.cos(b.theta)
-            + this.m * v * v / this.L;
-    }
-
-    getDragForce(ballIndex) {
-        return this.b * Math.abs(this.L * this.balls[ballIndex].omega);
-    }
-
-
-    getMaxHeight(thetaRad) {
-        return this.L * (1 - Math.cos(thetaRad));
-    }
-
-
-    getStringCoords(ballIndex, pivotY = 0, zOffset = 0) {
-        const b = this.balls[ballIndex];
-        const ballX = b.x0 + this.L * Math.sin(b.theta);
-        const ballY = pivotY - this.L * Math.cos(b.theta);
-        return {
-            top: { x: b.x0, y: pivotY, z: zOffset },
-            bottom: { x: ballX, y: ballY, z: zOffset },
-        };
-    }
 
 }
-
-
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { NewtonsCradlePhysics };
-}
-

@@ -17,12 +17,13 @@ export class AnimationSystem {
         this.clock = new THREE.Clock();
         this.animate = this.animate.bind(this);
         this.lastCollisionId = null;
-        this.initUI(); 
+        this.initUI();
     }
 
     start() {
         this.animate();
     }
+
 
     initUI() {
         const ctx = document.getElementById('energyChart').getContext('2d');
@@ -38,10 +39,10 @@ export class AnimationSystem {
                 ]
             },
             options: {
-                animation: false, 
+                animation: false,
                 responsive: true,
                 scales: {
-                    x: { display: false }, 
+                    x: { display: false },
                     y: { beginAtZero: true, grid: { color: '#444' } }
                 },
                 plugins: {
@@ -50,17 +51,15 @@ export class AnimationSystem {
             }
         });
 
-        this.frameCount = 0; 
+        this.frameCount = 0;
     }
 
-   
     updateUI() {
         this.frameCount++;
-        if (this.frameCount % 3 === 0) {
-          
-            let energy = this.physics.getEnergy();
 
-          
+        if (this.frameCount % 3 === 0) {
+
+            let energy = this.physics.getEnergy();
             const threshold = 0.0001;
             let finalKE = Math.abs(energy.KE) < threshold ? 0 : energy.KE;
             let finalPE = Math.abs(energy.PE) < threshold ? 0 : energy.PE;
@@ -68,14 +67,53 @@ export class AnimationSystem {
 
             this.energyChart.data.datasets[0].data.shift();
             this.energyChart.data.datasets[0].data.push(finalKE);
-
             this.energyChart.data.datasets[1].data.shift();
             this.energyChart.data.datasets[1].data.push(finalPE);
-
             this.energyChart.data.datasets[2].data.shift();
             this.energyChart.data.datasets[2].data.push(finalTE);
-
             this.energyChart.update();
+
+            const periodData = this.physics.getPeriod();
+
+            const isStopped = this.physics.getEnergy().KE < 0.00001;
+
+            document.getElementById('theoretical-period').innerText = periodData.theoretical.toFixed(4);
+
+            if (isStopped) {
+                document.getElementById('measured-period').innerText = 'متوقف';
+            } else {
+                document.getElementById('measured-period').innerText = periodData.measured
+                    ? `${periodData.measured.toFixed(4)}`
+                    : 'جاري الحساب عند العبور...';
+            }
+            const tableBody = document.getElementById('balls-physics-table');
+            if (tableBody) {
+                tableBody.innerHTML = '';
+
+                this.physics.balls.forEach((ball, i) => {
+
+                    const tension = this.physics.getTension(i);
+                    const drag = this.physics.getDragForce(i);
+                    const maxHeight = this.physics.getMaxHeight(ball.theta);
+                    const impactVelocity = this.physics.getImpactVelocity(ball.theta);
+
+
+                    const displayTheta = Math.abs(ball.theta) < 0.0005 ? "0.000" : ball.theta.toFixed(3);
+                    const row = document.createElement('tr');
+                    row.style.borderBottom = '1px solid #444';
+
+                    row.innerHTML = `
+                        <td style="padding: 6px; font-weight: bold; color: #2ed573;">${i + 1}</td>
+                        <td style="padding: 6px;">${displayTheta}</td>
+                        <td style="padding: 6px; color: #ffa502;">${tension.toFixed(2)} N</td>
+                        <td style="padding: 6px; color: #ff4757;">${drag.toFixed(4)} N</td>
+                        <td style="padding: 6px; color: #1e90ff;">${(maxHeight * 100).toFixed(2)} سم</td>
+                        <td style="padding: 6px; color: #2ed573; font-weight: bold;">${impactVelocity.toFixed(2)} م/ث</td>
+                    `;
+
+                    tableBody.appendChild(row);
+                });
+            }
         }
 
         if (this.physics.justCollided) {
@@ -94,7 +132,7 @@ export class AnimationSystem {
                 الكرات: <span>[${latestLog.ballA} - ${latestLog.ballB}]</span><br>
                 قوة الصدمة: <span>${latestLog.collisionForce.toFixed(1)} N</span><br>
                 طاقة مبددة: <span>${(latestLog.energyLost * 1000).toFixed(2)} mJ</span>
-            `;
+                `;
 
                 logContainer.prepend(entryDiv);
 
@@ -192,7 +230,7 @@ export class AnimationSystem {
                 this.ballMeshes[i].rotation.z = b.theta;
             }
         });
-        this.updateUI(); 
+        this.updateUI();
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
         window.requestAnimationFrame(this.animate);
