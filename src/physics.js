@@ -12,7 +12,7 @@ export class NewtonsCradlePhysics {
         this.e = config.restitution ?? 0.97;
         this.b = config.airDamping ?? 0.004;
         this.initialAngle = config.initialAngle ?? Math.PI / 4;
-        this.substeps = config.substeps ?? 10;
+        this.substeps = config.substeps ?? 30;
         this.spacing = 2 * this.R;
         this.time = 0;
 

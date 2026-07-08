@@ -172,7 +172,7 @@ export class AnimationSystem {
         const folderPhysics = gui.addFolder('إعدادات فيزيائية');
 
         folderPhysics.add(this.physics, 'e', 0, 1).name('معامل الارتداد');
-        folderPhysics.add(this.physics, 'b', 0, 0.05).name('مقاومة الهواء');
+        folderPhysics.add(this.physics, 'b', 0, 0.5).name('مقاومة الهواء');
         folderPhysics.add(this.physics, 'initialAngle', 0, Math.PI / 2, 0.05)
             .name('زاوية الإطلاق (راديان)');
 

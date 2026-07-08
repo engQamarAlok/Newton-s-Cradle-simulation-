@@ -22,7 +22,7 @@ export class CollisionSolver {
                 const penetration = spacing - (xB - xA);
 
       
-                if (penetration >= -1e-6 && vA > vB) {
+                if (penetration >= -1e-6 && vA > vB + 0.001) {
     
                     const vA_new = ((1 - e) / 2) * vA + ((1 + e) / 2) * vB;
                     const vB_new = ((1 + e) / 2) * vA + ((1 - e) / 2) * vB;
